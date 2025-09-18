@@ -9,6 +9,7 @@ interface Replacement {
 
 function App() {
   const [file, setFile] = useState<File | null>(null);
+  const [pdfName, setPdfName] = useState("defaultpdf");
   const [replacements, setReplacements] = useState<Replacement[]>([
     { find: "", replace: "" },
   ]);
@@ -49,6 +50,7 @@ function App() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("replacements", JSON.stringify(replacements));
+    formData.append("pdfName", pdfName);
 
     const response = await fetch("http://localhost:5000/edit", {
       method: "POST",
@@ -59,7 +61,7 @@ function App() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "EditedCoverLetter.docx"; // or .pdf later
+    a.download = `${pdfName}.pdf`;
     a.click();
   };
 
@@ -72,6 +74,11 @@ function App() {
         <div>
           <label>Upload .docx file:</label>
           <input type="file" accept=".docx" onChange={handleFileChange} />
+        </div>
+
+        <div>
+          <label>Enter desired PDF name</label>
+          <input type="text" placeholder="Enter name of the pdf" value={pdfName} onChange={(e) => setPdfName(e.target.value)} />
         </div>
 
         {/* Replacement Fields */}
