@@ -36,6 +36,7 @@ def edit_document():
                     if r["find"] in cell.text:
                         cell.text = cell.text.replace(r["find"], r["replace"])
 
+    # Converts the docx into pdf and saves it
     docx_path = "temp.docx"
     pdf_name = request.form.get("pdfName", "EditedCoverLetter")
     pdf_path = f"{pdf_name}.pdf"    
@@ -46,8 +47,10 @@ def edit_document():
     with open(pdf_path, "rb") as f:
         pdf_bytes = io.BytesIO(f.read())
 
+    # Moves file pointer to the beginning of file
     pdf_bytes.seek(0)
 
+    # Cleans up OS
     os.remove(docx_path)
     os.remove(pdf_path) 
 
