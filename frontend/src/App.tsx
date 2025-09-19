@@ -69,7 +69,7 @@ function App() {
       formData.append("replacements", JSON.stringify(replacements));
       formData.append("pdfName", pdfName);
 
-      const response = await fetch("https://custom-cover-letters.onrender.com/edit", {
+      const response = await fetch("http://127.0.0.1:5000/edit", {
         method: "POST",
         body: formData,
       });
