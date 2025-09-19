@@ -6,12 +6,29 @@ interface Replacement {
   replace: string;
 }
 
+const initialReplacement = [
+  {
+    find: "DATE", replace: "",
+  },
+  {
+    find: "COMP_NAME", replace: "",
+  },
+  {
+    find: "HM_NAME", replace: "",
+  },
+  {
+    find: "JOB_TITLE", replace: "",
+  },
+  {
+    find: "POS_NAME", replace: "",
+  },
+]
+
 function App() {
   const [file, setFile] = useState<File | null>(null);
   const [pdfName, setPdfName] = useState("examplePdf");
-  const [replacements, setReplacements] = useState<Replacement[]>([
-    { find: "", replace: "" },
-  ]);
+  const [replacements, setReplacements] = useState<Replacement[]>(initialReplacement);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAddReplacement = () => {
     setReplacements([...replacements, { find: "", replace: "" }]);
@@ -44,26 +61,45 @@ function App() {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("replacements", JSON.stringify(replacements));
-    formData.append("pdfName", pdfName);
+    setIsLoading(true); 
 
-    const response = await fetch("http://localhost:5000/edit", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("replacements", JSON.stringify(replacements));
+      formData.append("pdfName", pdfName);
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${pdfName}.pdf`;
-    a.click();
+      const response = await fetch("http://localhost:5000/edit", {
+        method: "POST",
+        body: formData,
+      });
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${pdfName}.pdf`;
+      a.click();
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while processing the file.");
+    } finally {
+      setIsLoading(false); 
+    }
   };
 
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-gray-900 to-gray-800 text-gray-200 flex flex-col items-center py-12 px-4">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+            <p className="text-gray-200 mt-4 text-xl">Processing your document...</p>
+          </div>
+        </div>
+      )}
+
       <header className="text-center mb-10">
         <h1 className="text-7xl font-[Poppins] bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent mb-2">
           Cover Letter Editor
