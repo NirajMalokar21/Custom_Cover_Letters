@@ -6,7 +6,6 @@ import json
 import os
 import subprocess
 import tempfile
-import logging
 
 app = Flask(__name__)
 CORS(app)  # allow requests from React
@@ -60,6 +59,7 @@ def convert_docx_to_pdf(docx_path, pdf_path):
     except Exception as e:
         print(f"Conversion error: {e}")
         return False
+    
 
 @app.route("/edit", methods=["POST"])
 def edit_document():
@@ -98,7 +98,7 @@ def edit_document():
             pdf_path = temp_pdf.name
 
         # Convert using api
-        if not convert_with_convertapi(docx_path, os.path.dirname(pdf_path)):
+        if not convert_docx_to_pdf(docx_path, os.path.dirname(pdf_path)):
             return {"error": "PDF conversion failed"}, 500
 
         # Read the converted PDF
