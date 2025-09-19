@@ -6,9 +6,36 @@ import json
 import os
 import subprocess
 import tempfile
+import logging
 
 app = Flask(__name__)
 CORS(app)  # allow requests from React
+
+def convert_with_convertapi(docx_path, pdf_path):
+    """
+    Convert DOCX to PDF using ConvertAPI
+    Requires an API key (free tier available)
+    """
+    try:
+        api_key = os.environ.get('CONVERTAPI_SECRET')
+        if not api_key:
+            return False
+            
+        with open(docx_path, 'rb') as f:
+            response = requests.post(
+                'https://v2.convertapi.com/convert/docx/to/pdf',
+                files={'File': f},
+                data={'Secret': api_key}
+            )
+            
+        if response.status_code == 200:
+            with open(pdf_path, 'wb') as f:
+                f.write(response.content)
+            return True
+        return False
+    except Exception as e:
+        print(f"ConvertAPI error: {e}")
+        return False
 
 def convert_docx_to_pdf(docx_path, pdf_path):
     """
@@ -70,8 +97,8 @@ def edit_document():
         with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_pdf:
             pdf_path = temp_pdf.name
 
-        # Convert using LibreOffice
-        if not convert_docx_to_pdf(docx_path, os.path.dirname(pdf_path)):
+        # Convert using api
+        if not convert_with_convertapi(docx_path, os.path.dirname(pdf_path)):
             return {"error": "PDF conversion failed"}, 500
 
         # Read the converted PDF

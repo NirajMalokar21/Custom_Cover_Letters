@@ -69,10 +69,23 @@ function App() {
       formData.append("replacements", JSON.stringify(replacements));
       formData.append("pdfName", pdfName);
 
-      const response = await fetch("http://localhost:5000/edit", {
+      const response = await fetch("https://custom-cover-letters.onrender.com/edit", {
         method: "POST",
         body: formData,
       });
+
+      // Check if the response is OK
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${response.status} ${response.statusText}\n${errorText}`);
+      }
+
+      // Check if the response is a PDF
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/pdf')) {
+        const errorText = await response.text();
+        throw new Error(`Expected PDF but got: ${contentType}\n${errorText}`);
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -82,7 +95,14 @@ function App() {
       a.click();
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while processing the file.");
+      
+      // Handle the error safely
+      let errorMessage = "An error occurred while processing the file.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsLoading(false); 
     }
