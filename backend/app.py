@@ -15,6 +15,7 @@ CORS(app)
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Run test for API
 @app.route("/", methods=["GET"])
 def root():
     return jsonify({
@@ -22,6 +23,7 @@ def root():
         "message": "Cover Letter Editor API is running"
     })
 
+# Run test for libre office
 @app.route("/health", methods=["GET"])
 def health_check():
     # Test if LibreOffice is working
@@ -39,6 +41,7 @@ def health_check():
             "status": "unhealthy",
             "error": f"LibreOffice check failed: {str(e)}"
         }), 500
+
 
 def convert_docx_to_pdf(docx_path, output_dir):
     """
@@ -73,8 +76,8 @@ def convert_docx_to_pdf(docx_path, output_dir):
             cmd,
             capture_output=True,
             text=True,
-            timeout=120,  # Longer timeout for conversion
-            cwd=output_dir  # Run in the output directory
+            timeout=120,  
+            cwd=output_dir  
         )
         
         logging.info(f"LibreOffice return code: {result.returncode}")
